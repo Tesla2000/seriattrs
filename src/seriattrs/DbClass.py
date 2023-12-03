@@ -1,12 +1,14 @@
-import json
 import random
+# from datetime import datetime
 from typing import Any, Self
 
 from attr import define, fields, field
 
 from .db_attrs_converter import db_attrs_converter
-from .JsonEncoder import Decoder
-from .JsonEncoder.default_json_encoder import json_encoder
+
+
+# from .JsonEncoder import Decoder
+# from .JsonEncoder.default_json_encoder import json_encoder
 
 
 @define
@@ -16,26 +18,27 @@ class DbClass:
     def __attrs_post_init__(self):
         if hasattr(self, 'id'):
             self._id = self.id
-        self._decode()
+        # self._decode()
 
     def get_db_representation(self) -> dict:
-        from .DbClassLiteral import DbClassLiteral
+        # from .DbClassLiteral import DbClassLiteral
 
-        return json.loads(
-            json.dumps(
-                dict(
-                    (
-                        f.name,
-                        value._id
-                        if isinstance(value := getattr(self, f.name), DbClass)
-                        and not isinstance(value, DbClassLiteral)
-                        else value,
-                    )
-                    for f in fields(type(self))
-                ),
-                cls=json_encoder,
-            )
-        )
+        return db_attrs_converter.unstructure_attrs_asdict(self)
+        # return json.loads(
+        #     json.dumps(
+        #         dict(
+        #             (
+        #                 f.name,
+        #                 value._id
+        #                 if isinstance(value := getattr(self, f.name), DbClass)
+        #                 and not isinstance(value, DbClassLiteral)
+        #                 else value,
+        #             )
+        #             for f in fields(type(self))
+        #         ),
+        #         cls=json_encoder,
+        #     )
+        # )
 
     @classmethod
     def from_dict(cls, dictionary: dict) -> Self:
@@ -51,9 +54,9 @@ class DbClass:
             if issubclass(f.type, DbClassLiteral):
                 f.type._fill_id(getattr(self, f.name), dictionary[f.name])
 
-    def _decode(self):
-        for f in fields(type(self)):
-            for decoder in Decoder.__subclasses__():
-                if decoder.is_valid(f.type):
-                    setattr(self, f.name, decoder.decode(getattr(self, f.name), f.type))
-                    break
+    # def _decode(self):
+    #     for f in fields(type(self)):
+    #         for decoder in Decoder.__subclasses__():
+    #             if decoder.is_valid(f.type):
+    #                 setattr(self, f.name, decoder.decode(getattr(self, f.name), f.type))
+    #                 break

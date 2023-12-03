@@ -1,7 +1,8 @@
+from importlib import import_module
 from pathlib import Path
 
-__all__ = [
-    module.name.partition(".")[0]
+tuple(
+    import_module('.' + module.name.partition(".")[0], __package__)
     for module in Path(__file__).parent.iterdir()
     if module.name not in ("__init__.py", "pycache")
-]
+)
